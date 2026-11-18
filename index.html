@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Spirit Island World Tour</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Alegreya+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* VOICE: a game companion — calm, earthy, a little ceremonial, never cluttered
+   IDEA: the island's record of the spirits that drove each invader away
+   PICTURE: the draw — a large card naming the next spirit and invader; the grid itself below
+   COLOUR and TYPE: deep jungle teal ground, sand panels, ember for wins/actions; Marcellus + Alegreya Sans
+   LAYOUT: title band, draw card full width, filters row, the spirit × adversary grid */
+:root{color-scheme:light dark;
+--bg:light-dark(#f3efe4,#0b1d1c);--panel:light-dark(#fffdf7,#12292a);--ink:light-dark(#1d2a26,#e8efe9);
+--mute:light-dark(#5f6b64,#9db1aa);--line:light-dark(#ddd5c2,#24403f);--deep:light-dark(#0f3d3a,#071514);
+--deepink:#f1ede1;--ember:light-dark(#d4532b,#ff7a4d);--win:light-dark(#2f7d4f,#4fbf7d);--winbg:light-dark(#dcefe2,#173b2a);--gold:light-dark(#b8862b,#e3b55a)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.55 "Alegreya Sans",system-ui,sans-serif;overflow-x:clip}
+h1,h2,.serif{font-family:Marcellus,Georgia,serif;font-weight:400}
+.band{padding:clamp(24px,4vw,56px) max(5vw,16px)}
+.wrap{max-width:1240px;margin:0 auto}
+header.band{background:var(--deep);color:var(--deepink);padding-bottom:clamp(80px,9vw,120px);position:relative;overflow:hidden}
+header svg.isle{position:absolute;right:-40px;bottom:-30px;width:min(560px,70vw);opacity:.22;pointer-events:none}
+h1{font-size:clamp(34px,5vw,52px);line-height:1.05;margin:0 0 6px;text-wrap:balance}
+.sub{margin:0;color:#c9d6cf;font-size:18px}
+.stats{display:flex;flex-wrap:wrap;gap:14px 36px;margin-top:22px}
+.stat b{display:block;font:400 clamp(28px,4vw,38px)/1 Marcellus,serif;color:#fff}
+.stat span{font-size:14px;color:#b7c8c0}
+.save{position:absolute;top:18px;right:max(5vw,16px);font-size:14px;color:#b7c8c0;display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:flex-end;z-index:2;max-width:calc(100% - 32px)}
+.save form{display:flex;gap:6px}.save form[hidden],.save [hidden]{display:none}
+.save input{font:inherit;font-size:16px;min-height:40px;padding:6px 10px;border-radius:10px;border:1px solid #ffffff40;background:#ffffff14;color:#fff;width:210px}
+.btn.small{min-height:40px;padding:6px 14px;font-size:15px}
+.link{font:inherit;font-size:14px;background:none;border:0;color:var(--gold);cursor:pointer;min-height:40px;text-decoration:underline}
+main{margin-top:calc(-1 * clamp(64px,8vw,100px))}
+.draw{background:var(--panel);border:1px solid var(--line);border-radius:18px;box-shadow:0 18px 40px -24px #0008;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.4fr);overflow:hidden}
+.draw .ctl{padding:24px;border-right:1px solid var(--line);display:flex;flex-direction:column;gap:14px}
+.draw .res{padding:clamp(22px,3vw,36px);display:flex;flex-direction:column;justify-content:center;gap:10px;min-height:260px;background:radial-gradient(120% 90% at 100% 0%,light-dark(#e9f2ec,#183533) 0%,transparent 60%)}
+.lbl{font-size:14px;color:var(--mute);margin:0 0 6px}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+.seg button,.chip{font:inherit;font-size:15px;min-height:44px;padding:8px 14px;border-radius:999px;border:1px solid var(--line);background:transparent;color:var(--ink);cursor:pointer}
+.seg button[aria-pressed=true],.chip[aria-pressed=true]{background:var(--deep);color:var(--deepink);border-color:var(--deep)}
+select,input[type=search]{font:inherit;font-size:16px;min-height:44px;width:100%;padding:8px 12px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink)}
+.btn{font:inherit;font-weight:700;font-size:16px;min-height:48px;padding:10px 20px;border-radius:12px;border:0;cursor:pointer;background:var(--ember);color:#fff}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line);font-weight:500}
+.btn:disabled{opacity:.45;cursor:default}
+:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.res .who{font:400 clamp(28px,4.2vw,44px)/1.08 Marcellus,serif;margin:0;text-wrap:balance}
+.res .vs{font-size:15px;color:var(--mute);text-transform:none;margin:2px 0}
+.res .adv{font:400 clamp(22px,3vw,30px)/1.1 Marcellus,serif;color:var(--ember);margin:0}
+.res .meta{font-size:15px;color:var(--mute)}
+.res .acts{display:flex;flex-wrap:wrap;gap:10px;margin-top:8px}
+.res .empty{color:var(--mute);font-size:18px;max-width:34ch}
+.bar{display:flex;flex-wrap:wrap;gap:12px 20px;align-items:end;margin:28px 0 14px}
+.bar .grow{flex:1 1 240px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chk{display:flex;align-items:center;gap:8px;min-height:44px;font-size:15px;cursor:pointer}
+.chk input{width:20px;height:20px;accent-color:var(--ember)}
+.scroll{overflow-x:auto;background:var(--panel);border:1px solid var(--line);border-radius:14px}
+table{border-collapse:separate;border-spacing:0;width:100%;min-width:720px}
+th,td{padding:0;border-bottom:1px solid var(--line)}
+thead th{position:sticky;top:0;background:var(--panel);font-size:13px;font-weight:700;color:var(--mute);padding:12px 4px;text-align:center;z-index:1}
+thead th:first-child{text-align:left;padding-left:16px}
+td.sp{padding:10px 12px 10px 16px;position:sticky;left:0;background:var(--panel);z-index:1;width:300px}
+td.sp .n{font-weight:700;line-height:1.2}
+td.sp .e{font-size:13px;color:var(--mute)}
+.prog{height:5px;border-radius:3px;background:var(--line);margin-top:6px;overflow:hidden}
+.prog i{display:block;height:100%;background:var(--win)}
+tr.done td.sp .n::after{content:" ✦ tour completo";color:var(--gold);font-weight:500;font-size:13px}
+tr.done td{background:light-dark(#f6f1df,#1a2d22)}
+td.c{text-align:center;padding:4px}
+.cell{width:44px;height:44px;border-radius:10px;border:1px dashed var(--line);background:transparent;cursor:pointer;color:var(--win);font-size:20px;line-height:1}
+.cell:hover{border-color:var(--win)}
+.cell[aria-pressed=true]{background:var(--winbg);border:1px solid var(--win)}
+.cell.now{border:2px solid var(--ember)}
+tbody tr:last-child td{border-bottom:0}
+.note{font-size:14px;color:var(--mute);margin:12px 2px 0}
+.toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%) translateY(140%);background:var(--deep);color:var(--deepink);padding:10px 12px 10px 18px;border-radius:12px;display:flex;gap:14px;align-items:center;transition:transform .25s;z-index:9;max-width:calc(100vw - 24px)}
+.toast.on{transform:translateX(-50%)}
+.toast button{font:inherit;font-weight:700;background:transparent;color:var(--gold);border:0;min-height:40px;cursor:pointer}
+@media(max-width:760px){.draw{grid-template-columns:1fr}.draw .ctl{border-right:0;border-bottom:1px solid var(--line);order:2}.draw .res{order:1}td.sp{width:190px;padding-left:10px}.save{position:static;justify-content:flex-start;margin-bottom:14px;max-width:none}}
+@media(prefers-reduced-motion:reduce){.toast{transition:none}.res.flash{animation:none}}
+.res.flash{animation:fl .5s ease}@keyframes fl{from{opacity:.2;transform:translateY(6px)}to{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+<header class="band">
+  <svg class="isle" viewBox="0 0 400 260" aria-hidden="true"><path d="M40 190c20-60 70-90 120-110 40-16 70-40 110-30 50 12 90 60 100 110 6 32-20 60-70 64-60 5-100-20-150-14-50 6-100 30-110-20z" fill="#9fd0b8"/><path d="M150 120c20-30 50-40 70-20s10 50-20 60-60-10-50-40z" fill="#e8d6a6"/><circle cx="270" cy="150" r="22" fill="#e8d6a6"/></svg>
+  <div class="wrap">
+    <div class="save"><span id="save">Carregando…</span>
+      <form id="login" hidden><input type="email" id="email" placeholder="seu e-mail" required autocomplete="email"><button class="btn small" type="submit">Entrar</button></form>
+      <button class="link" id="logout" hidden>Sair</button></div>
+    <h1>Spirit Island · World Tour</h1>
+    <p class="sub">Um espírito, os oito adversários, sempre no nível 6.</p>
+    <div class="stats" id="stats"></div>
+  </div>
+</header>
+<main class="band" style="padding-top:0">
+<div class="wrap">
+  <section class="draw" aria-label="Sortear próximo jogo">
+    <div class="ctl">
+      <div><p class="lbl">Sortear entre</p>
+        <div class="seg" id="modes">
+          <button data-m="any">Qualquer pendente</button>
+          <button data-m="cont">Continuar um tour</button>
+          <button data-m="new">Espírito novo</button>
+        </div></div>
+      <div><label class="lbl" for="fix">Fixar espírito (opcional)</label><select id="fix"></select></div>
+      <button class="btn" id="roll">Sortear jogo</button>
+    </div>
+    <div class="res" id="res" aria-live="polite"></div>
+  </section>
+
+  <div class="bar">
+    <div class="grow"><label class="lbl" for="q">Buscar espírito</label><input type="search" id="q" placeholder="ex.: Volcano"></div>
+    <div><p class="lbl">Expansões que você tem</p><div class="chips" id="exps"></div></div>
+    <label class="chk"><input type="checkbox" id="hide"> Esconder tours completos</label>
+  </div>
+
+  <div class="scroll"><table><thead><tr id="head"></tr></thead><tbody id="rows"></tbody></table></div>
+  <p class="note">Toque num quadrado para marcar (ou desmarcar) uma vitória no nível 6. Siglas: passe o dedo ou o mouse no cabeçalho para ver o nome completo.</p>
+</div>
+</main>
+<div class="toast" id="toast" role="status"><span id="tmsg"></span><button id="undo">Desfazer</button></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="config.js"></script>
+
+<script>
+{
+const ADV=[["bp","Brandenburg-Prussia","BP"],["en","England","ING"],["sw","Sweden","SUE"],["fr","France","FRA"],["hl","Habsburg Monarchy","HAB"],["ru","Russia","RUS"],["sc","Scotland","ESC"],["hm","Habsburg Mining Expedition","MIN"]].map(([id,n,s])=>({id,n,s}));
+const EXP={"Base":["Lightning's Swift Strike","River Surges in Sunlight","Vital Strength of the Earth","Shadows Flicker Like Flame","Thunderspeaker","A Spread of Rampant Green","Ocean's Hungry Grasp","Bringer of Dreams and Nightmares"],
+"Branch & Claw":["Keeper of the Forbidden Wilds","Sharp Fangs Behind the Leaves"],
+"Promo Pack 1":["Heart of the Wildfire","Serpent Slumbering Beneath the Island"],
+"Jagged Earth":["Grinning Trickster Stirs Up Trouble","Lure of the Deep Wilderness","Many Minds Move as One","Shifting Memory of Ages","Stone's Unyielding Defiance","Volcano Looming High","Shroud of Silent Mist","Vengeance as a Burning Plague","Starlight Seeks Its Form","Fractured Days Split the Sky"],
+"Promo Pack 2":["Downpour Drenches the World","Finder of Paths Unseen"],
+"Horizons":["Devouring Teeth Lurk Underfoot","Eyes Watch from the Trees","Fathomless Mud of the Swamp","Rising Heat of Stone and Sand","Sun-Bright Whirlwind"],
+"Nature Incarnate":["Breath of Darkness Down Your Spine","Dances Up Earthquakes","Ember-Eyed Behemoth","Hearth-Vigil","Relentless Gaze of the Sun","Towering Roots of the Jungle","Wandering Voice Keens Delirium","Wounded Waters Bleeding"]};
+const SP=Object.entries(EXP).flatMap(([e,l])=>l.map(n=>({id:n.toLowerCase().replace(/[^a-z]+/g,"-"),n,e})));
+const $=id=>document.getElementById(id);
+const today=()=>new Date().toISOString().slice(0,10);
+const fmt=d=>d?d.split("-").reverse().join("/"):"";
+let S={wins:{},exps:Object.keys(EXP),mode:"any",fix:"",current:null};
+let undoFn=null,tt=null,saveT=null,writing=false,pending=false,loaded=false;
+
+const K=(s,a)=>s+"|"+a;
+const won=(s,a)=>!!S.wins[K(s,a)];
+const count=s=>ADV.filter(a=>won(s,a.id)).length;
+const pool=()=>SP.filter(s=>S.exps.includes(s.e));
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+const spName=id=>(SP.find(s=>s.id===id)||{}).n||id;
+const advName=id=>(ADV.find(a=>a.id===id)||{}).n||id;
+
+function stats(){
+  const p=pool(),tot=p.length*ADV.length,w=p.reduce((t,s)=>t+count(s.id),0);
+  const done=p.filter(s=>count(s.id)===8).length,mid=p.filter(s=>{const c=count(s.id);return c>0&&c<8}).length;
+  $("stats").innerHTML=[[done,"tours completos"],[mid,"tours em andamento"],[w+" / "+tot,"vitórias no nível 6"]].map(([b,t])=>`<div class="stat"><b>${b}</b><span>${t}</span></div>`).join("");
+}
+function head(){
+  $("head").innerHTML=`<th>Espírito</th>`+ADV.map(a=>`<th title="${a.n}" scope="col"><abbr title="${a.n}" style="text-decoration:none">${a.s}</abbr></th>`).join("");
+}
+function rows(){
+  const q=$("q").value.trim().toLowerCase(),hide=$("hide").checked,cur=S.current;
+  const list=pool().filter(s=>(!q||s.n.toLowerCase().includes(q))&&!(hide&&count(s.id)===8));
+  $("rows").innerHTML=list.length?list.map(s=>{const c=count(s.id);
+    return `<tr class="${c===8?"done":""}"><td class="sp"><div class="n">${s.n}</div><div class="e">${s.e} · ${c}/8</div><div class="prog"><i style="width:${c/8*100}%"></i></div></td>`+
+    ADV.map(a=>{const d=S.wins[K(s.id,a.id)],now=cur&&cur.s===s.id&&cur.a===a.id;
+      return `<td class="c"><button class="cell${now?" now":""}" data-s="${s.id}" data-a="${a.id}" aria-pressed="${!!d}" title="${a.n}${d?" — vencido em "+fmt(d):""}" aria-label="${s.n} contra ${a.n}">${d?"✓":""}</button></td>`}).join("")+`</tr>`}).join("")
+    :`<tr><td class="sp" colspan="9" style="color:var(--mute)">Nenhum espírito com esses filtros.</td></tr>`;
+}
+function fixOpts(){
+  $("fix").innerHTML=`<option value="">Sortear o espírito também</option>`+pool().filter(s=>count(s.id)<8).map(s=>`<option value="${s.id}"${S.fix===s.id?" selected":""}>${s.n} (${count(s.id)}/8)</option>`).join("");
+  if(S.fix&&!$("fix").value)S.fix="";
+}
+function modes(){for(const b of $("modes").children)b.setAttribute("aria-pressed",b.dataset.m===S.mode&&!S.fix);}
+function result(flash){
+  const r=$("res"),c=S.current;
+  if(!c){r.innerHTML=`<p class="empty">Escolha de onde sortear e toque em <b>Sortear jogo</b>. Só entram combinações que você ainda não venceu.</p>`;return}
+  const n=count(c.s),done=won(c.s,c.a);
+  r.innerHTML=`<p class="lbl">Próximo jogo · nível 6</p><p class="who">${spName(c.s)}</p><p class="vs">contra</p><p class="adv">${advName(c.a)}</p>
+  <p class="meta">${done?"Vitória registrada! ":""}Esse espírito está com ${n}/8 adversários vencidos.</p>
+  <div class="acts"><button class="btn" id="win"${done?" disabled":""}>${done?"Vencido ✓":"Venci!"}</button><button class="btn ghost" id="reroll">Sortear outro</button></div>`;
+  if(flash){r.classList.remove("flash");void r.offsetWidth;r.classList.add("flash")}
+}
+function render(){stats();fixOpts();modes();rows();result()}
+
+function roll(){
+  const p=pool();let cands=[];
+  if(S.fix){cands=ADV.filter(a=>!won(S.fix,a.id)).map(a=>({s:S.fix,a:a.id}))}
+  else{
+    let sp=p.filter(s=>count(s.id)<8);
+    if(S.mode==="cont")sp=sp.filter(s=>count(s.id)>0);
+    if(S.mode==="new")sp=sp.filter(s=>count(s.id)===0);
+    if(sp.length){const s=pick(sp);cands=ADV.filter(a=>!won(s.id,a.id)).map(a=>({s:s.id,a:a.id}));
+      if(S.mode==="any")cands=sp.flatMap(x=>ADV.filter(a=>!won(x.id,a.id)).map(a=>({s:x.id,a:a.id})));}
+  }
+  const prev=S.current,alt=cands.filter(c=>!prev||c.s!==prev.s||c.a!==prev.a);
+  if(!cands.length){S.current=null;$("res").innerHTML=`<p class="empty">${S.mode==="cont"&&!S.fix?"Nenhum tour em andamento ainda. Tente “Espírito novo”.":S.mode==="new"&&!S.fix?"Você já jogou com todos os espíritos dessas expansões!":"Nada pendente aqui — tudo vencido."}</p>`;save();rows();return}
+  S.current=pick(alt.length?alt:cands);save();rows();result(true);
+}
+function setWin(s,a,on,msg){
+  const k=K(s,a),before=S.wins[k];
+  if(on)S.wins[k]=before||today();else delete S.wins[k];
+  save();render();
+  toast(msg||(on?`Vitória: ${spName(s)} × ${advName(a)}`:`Desmarcado: ${spName(s)} × ${advName(a)}`),()=>{if(before)S.wins[k]=before;else delete S.wins[k];save();render()});
+  if(on&&count(s)===8)toast(`✦ World Tour completo com ${spName(s)}!`,undoFn);
+}
+function toast(m,u){undoFn=u;$("tmsg").textContent=m;$("toast").classList.add("on");clearTimeout(tt);tt=setTimeout(()=>$("toast").classList.remove("on"),6000)}
+
+/* persistence: Supabase (cloud, per user) with localStorage cache */
+let sb=null,uid=null;
+function status(t){$("save").textContent=t}
+function local(){try{localStorage.setItem("si-wt",JSON.stringify(S))}catch(e){}}
+function save(){local();if(!loaded)return;if(!uid){status(sb?"Entre para salvar na nuvem":"Salvo só neste navegador");return}
+  status("Salvando…");clearTimeout(saveT);saveT=setTimeout(flush,600)}
+async function flush(){if(!uid)return;if(writing){pending=true;return}writing=true;
+  const {error}=await sb.from("progress").upsert({user_id:uid,data:JSON.parse(JSON.stringify(S)),updated_at:new Date().toISOString()});
+  status(error?"Não salvou na nuvem — guardado neste navegador":"Progresso salvo na nuvem");
+  writing=false;if(pending){pending=false;flush()}}
+function merge(d){if(!d||typeof d!=="object")return;S={...S,...d,wins:d.wins||{},exps:Array.isArray(d.exps)&&d.exps.length?d.exps:S.exps}}
+
+try{const l=JSON.parse(localStorage.getItem("si-wt")||"null");merge(l)}catch(e){}
+head();render();
+
+/* events */
+$("rows").addEventListener("click",e=>{const b=e.target.closest(".cell");if(!b)return;const s=b.dataset.s,a=b.dataset.a;setWin(s,a,!won(s,a))});
+$("modes").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;S.mode=b.dataset.m;S.fix="";save();fixOpts();modes()});
+$("fix").addEventListener("change",e=>{S.fix=e.target.value;save();modes()});
+$("roll").addEventListener("click",roll);
+$("res").addEventListener("click",e=>{if(e.target.id==="reroll")roll();if(e.target.id==="win"&&S.current)setWin(S.current.s,S.current.a,true)});
+$("q").addEventListener("input",rows);$("hide").addEventListener("change",rows);
+$("undo").addEventListener("click",()=>{if(undoFn)undoFn();undoFn=null;$("toast").classList.remove("on")});
+$("exps").innerHTML=Object.keys(EXP).map(e=>`<button class="chip" data-e="${e}">${e}</button>`).join("");
+const expsUI=()=>{for(const b of $("exps").children)b.setAttribute("aria-pressed",S.exps.includes(b.dataset.e))};expsUI();
+$("exps").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;const x=b.dataset.e;
+  S.exps=S.exps.includes(x)?S.exps.filter(y=>y!==x):[...S.exps,x];if(!S.exps.length)S.exps=[x];expsUI();save();render()});
+
+async function signedIn(user){
+  uid=user.id;$("login").hidden=true;$("logout").hidden=false;status("Carregando da nuvem…");
+  const {data,error}=await sb.from("progress").select("data").eq("user_id",uid).maybeSingle();
+  if(error){status("Erro ao ler a nuvem — usando este navegador");return}
+  if(data&&data.data&&data.data.wins){merge(data.data);local();expsUI();render();status("Progresso salvo na nuvem")}
+  else flush(); /* first login: upload what this browser has */
+}
+function signedOut(){uid=null;$("login").hidden=false;$("logout").hidden=true;status("Entre para salvar na nuvem")}
+(async()=>{
+  const C=window.SI_CONFIG||{};
+  if(!window.supabase||!C.url||!C.key){loaded=true;status("Salvo só neste navegador");return}
+  sb=window.supabase.createClient(C.url,C.key);
+  $("login").addEventListener("submit",async e=>{e.preventDefault();const email=$("email").value.trim();if(!email)return;
+    status("Enviando link…");
+    const {error}=await sb.auth.signInWithOtp({email,options:{emailRedirectTo:location.origin+location.pathname}});
+    status(error?"Não consegui enviar: "+error.message:"Confira seu e-mail e clique no link");});
+  $("logout").addEventListener("click",async()=>{await sb.auth.signOut();signedOut()});
+  loaded=true;
+  const {data:{session}}=await sb.auth.getSession();
+  if(session)await signedIn(session.user);else signedOut();
+  sb.auth.onAuthStateChange((ev,s)=>{if(ev==="SIGNED_IN"&&s&&s.user.id!==uid)signedIn(s.user)});
+})();
+}
+</script>
+</body>
+</html>
